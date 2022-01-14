@@ -1,11 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { Account, AccountsType } from '../../models/accounts';
+import { Account } from '../../models/accounts';
+import { AccountsResponse } from '../../models/responses';
 
 const router = express.Router();
-
-interface AccountsResponse extends Response {
-  account?: AccountsType;
-}
 
 // @route   GET api/accounts
 // @desc    Get All Accounts

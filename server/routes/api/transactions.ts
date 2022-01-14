@@ -1,17 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { Transaction, TransactionType } from '../../models/transactions';
+import { Transaction } from '../../models/transactions';
+import { TransactionResponse, DeleteResponse } from '../../models/responses';
 
 const router = express.Router();
-
-interface TransactionResponse extends Response {
-  transaction?: TransactionType;
-}
-
-interface DeleteResponse extends Response {
-  n?: number;
-  ok?: number;
-  deletedCount?: number;
-}
 
 // @route   GET api/transactons
 // @desc    Get All transactions
