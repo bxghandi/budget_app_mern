@@ -1,12 +1,9 @@
-import * as dotenv from 'dotenv';
 import axios, { AxiosResponse } from 'axios';
 import { AccountType } from '../models/accounts.interface';
 import { TransactionType } from '../models/transactions.interface';
 
-dotenv.config();
-
 const api = axios.create({
-  baseURL: process.env.BASE_URL,
+  baseURL: process.env.REACT_APP_BASE_URL,
   timeout: 1500,
 });
 
@@ -17,6 +14,8 @@ const requests = {
   post: (url: string, body: {}) => api.post(url, body).then(responseBody),
   patch: (url: string, body: {}) => api.patch(url, body).then(responseBody),
   delete: (url: string) => api.delete(url).then(responseBody),
+  deleteMany: (url: string, body: {}) =>
+    api.delete(url, body).then(responseBody),
 };
 
 export const Account = {
@@ -50,4 +49,6 @@ export const Transaction = {
     await requests.patch(`accounts/${id}`, transaction),
   deleteTransaction: async (id: string): Promise<TransactionType> =>
     await requests.delete(`transactions/${id}`),
+  deleteManyTransactions: async (ids: string[]): Promise<TransactionType> =>
+    await requests.deleteMany('transactions/many', {ids: ids}),
 };

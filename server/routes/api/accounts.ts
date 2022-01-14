@@ -53,9 +53,7 @@ router.delete(
   '/:id',
   getAccount,
   async (req: Request, res: AccountsResponse) => {
-    const currAccount = new Account(res.account);
-
-    await Account.findByIdAndRemove(currAccount.id)
+    await Account.findByIdAndRemove(req.params.id)
       .then(() => res.json({ message: 'Account Deleted' }))
       .catch((err) => res.status(500).json({ message: err.message }));
   }

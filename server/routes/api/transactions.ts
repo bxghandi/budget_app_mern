@@ -7,10 +7,16 @@ interface TransactionResponse extends Response {
   transaction?: TransactionType;
 }
 
+interface DeleteResponse extends Response {
+  n?: number;
+  ok?: number;
+  deletedCount?: number;
+}
+
 // @route   GET api/transactons
 // @desc    Get All transactions
 // @access  Public
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: TransactionResponse) => {
   Transaction.find()
     .sort({ date: -1 })
     .then((items) => res.json(items));
@@ -26,19 +32,10 @@ router.get('/:id', getTransaction, (req: Request, res: TransactionResponse) => {
 // @route   POST api/transactions
 // @desc    Create a transaction
 // @access  Public
-router.post('/', (req: Request, res: Response) => {
-  const newTransaction = new Transaction({
-    date: req.body.date,
-    description: req.body.description,
-    category: req.body.category,
-    amount: req.body.amount,
-    account: req.body.account,
-  });
-
-  newTransaction
-    .save()
-    .then((item) => res.status(201).json(item))
-    .catch((error) => res.status(400).json(error));
+router.post('/', async (req: Request, res: Response) => {
+  await Transaction.create(req.body)
+    .then((account) => res.sendStatus(201).json(account))
+    .catch((err) => res.sendStatus(400).json(err));
 });
 
 // @route   UPDATE api/transactions/:id
@@ -47,34 +44,38 @@ router.post('/', (req: Request, res: Response) => {
 router.patch(
   '/:id',
   getTransaction,
-  (req: Request, res: TransactionResponse) => {
-    if (req.body.date != null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (res as any).item.date = req.body.date;
-    }
-    if (req.body.description != null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (res as any).item.description = req.body.description;
-    }
-    if (req.body.category != null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (res as any).item.category = req.body.category;
-    }
-    if (req.body.amount != null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (res as any).item.amount = req.body.amount;
-    }
-    if (req.body.account != null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (res as any).item.account = req.body.account;
-    }
-
-    const newTransaction = new Transaction(res.transaction);
-
-    newTransaction
-      .save()
-      .then(() => res.json(res.transaction))
+  async (req: Request, res: TransactionResponse) => {
+    await Transaction.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true, useFindAndModify: false }
+    )
+      .then((data) => res.json(data))
       .catch((err) => res.status(400).json(err));
+  }
+);
+
+// @route   DELETE api/transactions/many
+// @desc    Delete a transaction
+// @access  Public
+router.delete('/many', async (req: Request, res: DeleteResponse) => {
+  const idArray: string[] = req.body.ids;
+
+  await Transaction.deleteMany({ _id: { $in: idArray } })
+    .then((data) => res.send(data))
+    .catch((err) => res.sendStatus(500).json({ message: err.message }));
+});
+
+// @route   DELETE api/transactions/:id
+// @desc    Delete a transaction
+// @access  Public
+router.delete(
+  '/:id',
+  getTransaction,
+  async (req: Request, res: TransactionResponse) => {
+    await Transaction.findByIdAndRemove(req.params.id)
+      .then(() => res.json({ message: 'Transaction Deleted' }))
+      .catch((err) => res.status(500).json({ message: err.message }));
   }
 );
 

@@ -1,7 +1,7 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from '../logo.svg';
+import '../App.css';
 
-function App() {
+function Budget() {
   return (
     // <Layout>
     <div className='App'>
@@ -16,7 +16,7 @@ function App() {
           target='_blank'
           rel='noopener noreferrer'
         >
-          Learn React
+          Learn React Budget
         </a>
       </header>
     </div>
@@ -24,4 +24,4 @@ function App() {
   );
 }
 
-export default App;
+export default Budget;

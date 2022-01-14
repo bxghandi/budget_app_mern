@@ -22,7 +22,11 @@ app.use('/api/accounts', accounts);
 
 // Connect to Mongo
 mongoose
-  .connect(remote_mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(remote_mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
   .then(() => console.log('Remote MongoDB Connected...'))
   .catch((err) => {
     console.log(err);

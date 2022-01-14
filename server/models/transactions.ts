@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 interface Transaction {
+  id?: string;
   date: Date;
   description: string;
   category: string;
@@ -9,6 +10,7 @@ interface Transaction {
 }
 
 export type TransactionType = {
+  id?: string;
   date: Date;
   description: string;
   category: string;
@@ -17,6 +19,10 @@ export type TransactionType = {
 };
 
 const schema = new Schema<Transaction>({
+  id: {
+    type: String,
+    required: false,
+  },
   date: {
     type: Date,
     required: true,

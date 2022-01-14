@@ -13,6 +13,7 @@ import useStore from '../../store';
 import { useEffect } from 'react';
 import SidebarMenus from './SidebarMenus';
 import { DrawerBox, TempDrawer } from '../styled/SideDrawer';
+import { useNavigate } from 'react-router-dom';
 
 const menus: string[] = ['Budget', 'Loans', 'Tracking', 'Closed'];
 
@@ -21,6 +22,7 @@ interface SideDrawerProps {}
 const SideDrawer: React.FC<SideDrawerProps> = () => {
   const open = useStore((state) => state.open);
   const setAccounts = useStore((state) => state.setAccounts);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -34,7 +36,7 @@ const SideDrawer: React.FC<SideDrawerProps> = () => {
   const contents = () => (
     <DrawerBox role='presentation'>
       <List>
-        <ListItemButton>
+        <ListItemButton onClick={() => navigate('/budget')}>
           <ListItemIcon sx={{ color: 'common.white' }}>
             <AttachMoneyIcon />
           </ListItemIcon>

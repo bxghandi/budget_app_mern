@@ -2,12 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Layout from './components/Layout';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
 import reportWebVitals from './reportWebVitals';
+import Budget from './pages/Budget';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Router>
+    <React.StrictMode>
+      <Layout>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/budget' element={<Budget />} />
+        </Routes>
+      </Layout>
+    </React.StrictMode>
+  </Router>,
   document.getElementById('root')
 );
 
