@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
-interface Accounts {
+interface Accounts extends Document {
   id?: string;
   name: string;
   nickname: string;

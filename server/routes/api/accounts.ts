@@ -51,7 +51,9 @@ router.delete(
   getAccount,
   async (req: Request, res: AccountsResponse) => {
     await Account.findByIdAndRemove(req.params.id)
-      .then(() => res.json({ message: 'Account Deleted' }))
+      .then(() =>
+        res.json({ account: res.account, message: 'Account Deleted' })
+      )
       .catch((err) => res.status(500).json({ message: err.message }));
   }
 );

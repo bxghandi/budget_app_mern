@@ -22,3 +22,11 @@ export const editAccountState = (
   ];
   return newState;
 };
+
+export const addToAccountState = (
+  newAccount: AccountType,
+  accounts: AccountType[]
+): AccountType[] => {
+  const newState: AccountType[] = [...accounts, newAccount];
+  return newState;
+};

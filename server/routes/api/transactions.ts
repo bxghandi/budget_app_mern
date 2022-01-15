@@ -25,8 +25,8 @@ router.get('/:id', getTransaction, (req: Request, res: TransactionResponse) => {
 // @access  Public
 router.post('/', async (req: Request, res: Response) => {
   await Transaction.create(req.body)
-    .then((account) => res.sendStatus(201).json(account))
-    .catch((err) => res.sendStatus(400).json(err));
+    .then((transaction) => res.status(201).json(transaction))
+    .catch((err) => res.status(400).json(err));
 });
 
 // @route   UPDATE api/transactions/:id

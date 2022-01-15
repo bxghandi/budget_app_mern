@@ -54,7 +54,7 @@ const SideDrawer: React.FC<SideDrawerProps> = () => {
             primaryTypographyProps={{ color: 'common.white' }}
           ></ListItemText>
         </ListItemButton>
-        <ListItemButton>
+        <ListItemButton onClick={() => navigate('/accounts')}>
           <ListItemIcon sx={{ color: 'common.white' }}>
             <AccountBalanceIcon />
           </ListItemIcon>

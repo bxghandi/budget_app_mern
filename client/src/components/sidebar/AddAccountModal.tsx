@@ -17,6 +17,7 @@ import { Account, Transaction } from '../../api/api';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import { addToAccountState } from '../../utils';
 import useStore from '../../store';
 
 interface ModalProps {
@@ -59,10 +60,6 @@ const AddAccountModal: React.FC<ModalProps> = ({ open, onClose, schema }) => {
   const handleClose = () => onClose();
   const watchCategory = watch('category', '');
 
-  const addToAccountState = (newAccount: AccountType): void => {
-    setAccounts([...accounts, newAccount]);
-  };
-
   const onSubmit: SubmitHandler<FormInput> = (data: FormInput) => {
     const transaction: TransactionType = {
       date: new Date(),
@@ -82,8 +79,8 @@ const AddAccountModal: React.FC<ModalProps> = ({ open, onClose, schema }) => {
     };
 
     Account.createAccount(account).then((res) => console.log(res));
-    addToAccountState(account);
-    Transaction.createTransaction(transaction);
+    setAccounts(addToAccountState(account, accounts));
+    Transaction.createTransaction(transaction).then((res) => console.log(res));
     reset();
     handleClose();
   };
@@ -134,7 +131,6 @@ const AddAccountModal: React.FC<ModalProps> = ({ open, onClose, schema }) => {
                       helperText={
                         errors.nickname ? errors.nickname?.message : ''
                       }
-                      //   sx={{ marginTop: 3, marginBottom: 3 }}
                       margin='normal'
                     />
                   )}

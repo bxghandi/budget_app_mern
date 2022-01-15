@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import Layout from './components/Layout';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import reportWebVitals from './reportWebVitals';
 import Budget from './pages/Budget';
+import AllAccounts from './pages/AllAccounts';
 
 ReactDOM.render(
   <Router>
@@ -15,6 +15,7 @@ ReactDOM.render(
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/budget' element={<Budget />} />
+          <Route path='/accounts' element={<AllAccounts />} />
         </Routes>
       </Layout>
     </React.StrictMode>
