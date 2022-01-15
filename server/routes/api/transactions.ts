@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { Transaction } from '../../models/transactions';
 import { TransactionResponse, DeleteResponse } from '../../models/responses';
+import { transactions_collection as collection } from '../../server';
 
 const router = express.Router();
 
@@ -8,9 +8,16 @@ const router = express.Router();
 // @desc    Get All transactions
 // @access  Public
 router.get('/', async (req: Request, res: TransactionResponse) => {
-  Transaction.find()
+  //   Transaction.find()
+  //     .sort({ date: -1 })
+  //     .then((items) => res.json(items));
+
+  await collection
+    .find({})
     .sort({ date: -1 })
-    .then((items) => res.json(items));
+    .toArray()
+    .then((transactions) => res.json(transactions))
+    .catch((err) => res.json(err));
 });
 
 // @route   GET api/transactions
@@ -24,9 +31,14 @@ router.get('/:id', getTransaction, (req: Request, res: TransactionResponse) => {
 // @desc    Create a transaction
 // @access  Public
 router.post('/', async (req: Request, res: Response) => {
-  await Transaction.create(req.body)
-    .then((transaction) => res.status(201).json(transaction))
-    .catch((err) => res.status(400).json(err));
+  //   await Transaction.create(req.body)
+  //     .then((transaction) => res.status(201).json(transaction))
+  //     .catch((err) => res.status(400).json(err));
+
+  await collection
+    .insertOne(req.body)
+    .then((transaction) => res.sendStatus(201).json(transaction))
+    .catch((err) => res.sendStatus(400).json(err));
 });
 
 // @route   UPDATE api/transactions/:id
@@ -36,11 +48,16 @@ router.patch(
   '/:id',
   getTransaction,
   async (req: Request, res: TransactionResponse) => {
-    await Transaction.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true, runValidators: true, useFindAndModify: false }
-    )
+    // await Transaction.findByIdAndUpdate(
+    //   req.params.id,
+    //   { $set: req.body },
+    //   { new: true, runValidators: true, useFindAndModify: false }
+    // )
+    //   .then((data) => res.json(data))
+    //   .catch((err) => res.status(400).json(err));
+
+    await collection
+      .updateOne({ _id: req.params.id }, { $set: req.body })
       .then((data) => res.json(data))
       .catch((err) => res.status(400).json(err));
   }
@@ -52,7 +69,8 @@ router.patch(
 router.delete('/many', async (req: Request, res: DeleteResponse) => {
   const idArray: string[] = req.body.ids;
 
-  await Transaction.deleteMany({ _id: { $in: idArray } })
+  await collection
+    .deleteMany({ _id: { $in: idArray } })
     .then((data) => res.send(data))
     .catch((err) => res.sendStatus(500).json({ message: err.message }));
 });
@@ -64,8 +82,18 @@ router.delete(
   '/:id',
   getTransaction,
   async (req: Request, res: TransactionResponse) => {
-    await Transaction.findByIdAndRemove(req.params.id)
-      .then(() => res.json({ message: 'Transaction Deleted' }))
+    // await Transaction.findByIdAndRemove(req.params.id)
+    //   .then(() => res.json({ message: 'Transaction Deleted' }))
+    //   .catch((err) => res.status(500).json({ message: err.message }));
+
+    await collection
+      .deleteOne({ _id: req.params.id })
+      .then(() =>
+        res.json({
+          transaction: res.transaction,
+          message: 'Transaction Deleted',
+        })
+      )
       .catch((err) => res.status(500).json({ message: err.message }));
   }
 );
@@ -78,7 +106,8 @@ async function getTransaction(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let transaction: any;
   try {
-    transaction = await Transaction.findById(req.params.id);
+    // transaction = await Transaction.findById(req.params.id);
+    transaction = await collection.find({ _id: req.params.id }).toArray();
     if (transaction == null) {
       return res.status(404).json({ message: 'Cannot find transaction' });
     }
