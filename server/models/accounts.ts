@@ -1,7 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 interface Accounts extends Document {
-  id?: string;
+  _id?: string;
   name: string;
   nickname: string;
   startingBalance: number;
@@ -11,7 +11,7 @@ interface Accounts extends Document {
 }
 
 export type AccountsType = {
-  id?: string;
+  _id?: string;
   name: string;
   nickname: string;
   startingBalance: number;
@@ -21,11 +21,6 @@ export type AccountsType = {
 };
 
 const schema = new Schema<Accounts>({
-  id: {
-    type: String,
-    required: false,
-    unique: true,
-  },
   name: {
     type: String,
     required: true,

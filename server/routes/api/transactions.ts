@@ -1,23 +1,24 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { TransactionResponse, DeleteResponse } from '../../models/responses';
-import { transactions_collection as collection } from '../../server';
+import {
+  getAll,
+  postOne,
+  deleteOne,
+  patchOne,
+  getOne,
+  deleteMany,
+} from '../../utils';
+import { TransactionType } from '../../models/transactions';
 
 const router = express.Router();
+const collectionName = process.env.TRANSACTIONS_COLLECTION as string;
 
 // @route   GET api/transactons
 // @desc    Get All transactions
 // @access  Public
 router.get('/', async (req: Request, res: TransactionResponse) => {
-  //   Transaction.find()
-  //     .sort({ date: -1 })
-  //     .then((items) => res.json(items));
-
-  await collection
-    .find({})
-    .sort({ date: -1 })
-    .toArray()
-    .then((transactions) => res.json(transactions))
-    .catch((err) => res.json(err));
+  const result = await getAll(collectionName);
+  res.json(result);
 });
 
 // @route   GET api/transactions
@@ -31,14 +32,9 @@ router.get('/:id', getTransaction, (req: Request, res: TransactionResponse) => {
 // @desc    Create a transaction
 // @access  Public
 router.post('/', async (req: Request, res: Response) => {
-  //   await Transaction.create(req.body)
-  //     .then((transaction) => res.status(201).json(transaction))
-  //     .catch((err) => res.status(400).json(err));
-
-  await collection
-    .insertOne(req.body)
-    .then((transaction) => res.sendStatus(201).json(transaction))
-    .catch((err) => res.sendStatus(400).json(err));
+  const newTransaction: TransactionType = req.body;
+  const postResults = await postOne(collectionName, newTransaction);
+  res.json(postResults.result);
 });
 
 // @route   UPDATE api/transactions/:id
@@ -48,18 +44,8 @@ router.patch(
   '/:id',
   getTransaction,
   async (req: Request, res: TransactionResponse) => {
-    // await Transaction.findByIdAndUpdate(
-    //   req.params.id,
-    //   { $set: req.body },
-    //   { new: true, runValidators: true, useFindAndModify: false }
-    // )
-    //   .then((data) => res.json(data))
-    //   .catch((err) => res.status(400).json(err));
-
-    await collection
-      .updateOne({ _id: req.params.id }, { $set: req.body })
-      .then((data) => res.json(data))
-      .catch((err) => res.status(400).json(err));
+    const results = await patchOne(collectionName, req.params.id, req.body);
+    res.json(results);
   }
 );
 
@@ -67,12 +53,8 @@ router.patch(
 // @desc    Delete a transaction
 // @access  Public
 router.delete('/many', async (req: Request, res: DeleteResponse) => {
-  const idArray: string[] = req.body.ids;
-
-  await collection
-    .deleteMany({ _id: { $in: idArray } })
-    .then((data) => res.send(data))
-    .catch((err) => res.sendStatus(500).json({ message: err.message }));
+  const deleteResults = await deleteMany(collectionName, req.body.ids);
+  res.json(deleteResults.result);
 });
 
 // @route   DELETE api/transactions/:id
@@ -82,19 +64,8 @@ router.delete(
   '/:id',
   getTransaction,
   async (req: Request, res: TransactionResponse) => {
-    // await Transaction.findByIdAndRemove(req.params.id)
-    //   .then(() => res.json({ message: 'Transaction Deleted' }))
-    //   .catch((err) => res.status(500).json({ message: err.message }));
-
-    await collection
-      .deleteOne({ _id: req.params.id })
-      .then(() =>
-        res.json({
-          transaction: res.transaction,
-          message: 'Transaction Deleted',
-        })
-      )
-      .catch((err) => res.status(500).json({ message: err.message }));
+    const deleteResult = await deleteOne(collectionName, req.params.id);
+    res.json(deleteResult.result);
   }
 );
 
@@ -106,8 +77,7 @@ async function getTransaction(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let transaction: any;
   try {
-    // transaction = await Transaction.findById(req.params.id);
-    transaction = await collection.find({ _id: req.params.id }).toArray();
+    transaction = await getOne(collectionName, req.params.id);
     if (transaction == null) {
       return res.status(404).json({ message: 'Cannot find transaction' });
     }

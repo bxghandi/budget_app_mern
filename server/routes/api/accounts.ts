@@ -1,19 +1,17 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { AccountsResponse } from '../../models/responses';
-import { accounts_collection as collection } from '../../server';
+import { AccountsType } from '../../models/accounts';
+import { getAll, postOne, deleteOne, patchOne, getOne } from '../../utils';
 
 const router = express.Router();
+const collectionName = process.env.ACCOUNTS_COLLECTION as string;
 
 // @route   GET api/accounts
 // @desc    Get All Accounts
 // @access  Public
 router.get('/', async (req: Request, res: AccountsResponse) => {
-  await collection
-    .find({})
-    .toArray()
-    .then((accounts) => res.json(accounts))
-    .catch((err) => res.json(err));
-  //   await Account.find().then((accounts) => res.json(accounts));
+  const result = await getAll(collectionName);
+  res.json(result);
 });
 
 // @route   GET api/accounts/:id
@@ -43,37 +41,10 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Invalid Sub-Category' });
   }
 
-  await collection
-    .insertOne(req.body)
-    .then((account) => res.sendStatus(201).json(account))
-    .catch((err) => res.sendStatus(400).json(err));
-
-  //   await Account.create(req.body)
-  //     .then((account) => res.sendStatus(201).json(account))
-  //     .catch((err) => res.sendStatus(400).json(err));
+  const newAccount: AccountsType = req.body;
+  const postResults = await postOne(collectionName, newAccount);
+  res.json(postResults.result);
 });
-
-// @route   DELETE api/account/:id
-// @desc    Delete an account
-// @access  Public
-router.delete(
-  '/:id',
-  getAccount,
-  async (req: Request, res: AccountsResponse) => {
-    // await Account.findByIdAndRemove(req.params.id)
-    //   .then(() =>
-    //     res.json({ account: res.account, message: 'Account Deleted' })
-    //   )
-    //   .catch((err) => res.status(500).json({ message: err.message }));
-
-    await collection
-      .deleteOne({ _id: res.account?.id })
-      .then(() =>
-        res.json({ account: res.account, message: 'Account Deleted' })
-      )
-      .catch((err) => res.status(500).json({ message: err.message }));
-  }
-);
 
 // @route   UPDATE api/account/:id
 // @desc    Update an account
@@ -82,19 +53,23 @@ router.patch(
   '/:id',
   getAccount,
   async (req: Request, res: AccountsResponse) => {
-    //     await Account.findByIdAndUpdate(
-    //       req.params.id,
-    //       { $set: req.body },
-    //       { new: true, runValidators: true, useFindAndModify: false }
-    //     )
-    //       .then((data) => res.json(data))
-    //       .catch((err) => res.status(400).json(err));
-    //   }
+    const results = await patchOne(collectionName, req.params.id, req.body);
+    res.json(results);
+  }
+);
 
-    await collection
-      .updateOne({ _id: req.params.id }, { $set: req.body })
-      .then((data) => res.json(data))
-      .catch((err) => res.status(400).json(err));
+// @route   DELETE api/account/:id
+// @desc    Delete an account
+// @access  Public
+router.delete(
+  '/:id',
+  getAccount,
+  async (req: Request, res: AccountsResponse) => {
+    if (res.account !== undefined) {
+      //   console.log('id', res.account._id);
+      const deleteResult = await deleteOne(collectionName, req.params.id);
+      res.json(deleteResult.result);
+    }
   }
 );
 
@@ -105,9 +80,9 @@ async function getAccount(
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let account: any;
+
   try {
-    // account = await Account.findById(req.params.id);
-    account = await collection.find({ _id: req.params.id }).toArray();
+    account = await getOne(collectionName, req.params.id);
     if (account == null) {
       return res.status(404).json({ message: 'Cannot find account' });
     }
